@@ -4,19 +4,19 @@ from flask import Flask
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 
-# បង្កើត Web Server តូចមួយសម្រាប់ Render
+# បង្កើត Web Server សម្រាប់ Render Health Check
 app_web = Flask(__name__)
 
 @app_web.route('/')
 def health_check():
-    return "Bot is running!", 200
+    return "Bot is active!", 200
 
 def run_flask():
     port = int(os.environ.get("PORT", 10000))
     app_web.run(host="0.0.0.0", port=port)
 
-# --- កូដ Bot របស់អ្នក ---
-BOT_TOKEN = os.environ.get("del_files_bot")
+# ទាញយក Token ពី Environment Variable
+BOT_TOKEN = os.environ.get("delfiles_bot")
 RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip"]
 
 async def check_and_delete_attachment(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -32,7 +32,7 @@ async def check_and_delete_attachment(update: Update, context: ContextTypes.DEFA
                     print(f"Error: {e}")
 
 def main():
-    # រត់ Flask លើ Thread ផ្សេង
+    # រត់ Web Server លើ Thread ផ្សេង
     threading.Thread(target=run_flask, daemon=True).start()
 
     # រត់ Telegram Bot
