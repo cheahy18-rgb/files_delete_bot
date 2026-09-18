@@ -1,50 +1,43 @@
 import os
-import logging
+import threading
+from flask import Flask
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 
-# កំណត់ Token របស់ Bot អ្នកនៅទីនេះ
-BOT_TOKEN = "8928133664:AAH6FCh4KvVlg0KDfNobmkXOkp1ZEiOOl_g"
+# បង្កើត Web Server តូចមួយសម្រាប់ Render
+app_web = Flask(__name__)
 
-# កំណត់ប្រភេទ Extension ដែលត្រូវលុប (អាចថែមថយបាន)
-RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip",".txt",]
+@app_web.route('/')
+def health_check():
+    return "Bot is running!", 200
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
+def run_flask():
+    port = int(os.environ.get("PORT", 10000))
+    app_web.run(host="0.0.0.0", port=port)
+
+# --- កូដ Bot របស់អ្នក ---
+BOT_TOKEN = os.environ.get("del_files_bot")
+RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip"]
 
 async def check_and_delete_attachment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
-    
-    # ពិនិត្យមើលថាសារមានផ្ញើជា Document/File ឬទេ
     if message and message.document:
         file_name = message.document.file_name
-        
         if file_name:
-            # ទាញយក extension នៃ file (ឧទាហរណ៍: .exe)
             _, file_extension = os.path.splitext(file_name.lower())
-            
-            # ពិនិត្យបើ extension ស្ថិតក្នុងបញ្ជីហាមឃាត់
             if file_extension in RESTRICTED_EXTENSIONS:
                 try:
-                    # លុបសារដែលមាន File នោះ
                     await message.delete()
-                    
-                    # ផ្ញើសារប្រាប់ក្នុង Group (ជម្រើសបន្ថែម)
-                    warning_msg = await message.chat.send_message(
-                       # f"⚠️ សាររបស់ @{message.from_user.username or message.from_user.first_name} ត្រូវបានលុប ដោយសារមានផ្ទុក File ប្រភេទ ({file_extension}) ដែលមិនត្រូវបានអនុញ្ញាត!"
-                    )
                 except Exception as e:
-                    logging.error(f"មិនអាចលុបសារបានទេ: {e}")
+                    print(f"Error: {e}")
 
 def main():
-    # បង្កើត Application
+    # រត់ Flask លើ Thread ផ្សេង
+    threading.Thread(target=run_flask, daemon=True).start()
+
+    # រត់ Telegram Bot
     app = Application.builder().token(BOT_TOKEN).build()
-
-    # ស្កេនរាល់សារទាំងឡាយណាដែលជាប្រភេទ Document/File
     app.add_handler(MessageHandler(filters.Document.ALL, check_and_delete_attachment))
-
-    print("Bot កំពុងដំណើរការ...")
     app.run_polling()
 
 if __name__ == "__main__":
