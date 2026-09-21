@@ -16,7 +16,7 @@ def run_flask():
     app_web.run(host="0.0.0.0", port=port)
 
 # ទាញយក Token
-BOT_TOKEN = os.environ.get("del_files_bot")
+BOT_TOKEN = os.environ.get("delfiles_bot")
 RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip", ".txt"]
 
 # Function សម្រាប់ឆ្លើយតបនៅពេលចុច /start
