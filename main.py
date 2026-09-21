@@ -17,7 +17,7 @@ def run_flask():
 
 # ទាញយក Token
 BOT_TOKEN = os.environ.get("del_files_bot")
-RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip"]
+RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip", ".txt"]
 
 # Function សម្រាប់ឆ្លើយតបនៅពេលចុច /start
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
