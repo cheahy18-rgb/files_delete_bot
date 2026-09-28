@@ -17,12 +17,12 @@ def run_flask():
 
 # ទាញយក Token
 BOT_TOKEN = os.environ.get("delfiles_bot")
-RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip", ".txt"]
+RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip", ".txt", ".mp3", ".wmv",  ".mp4", ".mp4"]
 
 # Function សម្រាប់ឆ្លើយតបនៅពេលចុច /start
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "ជំរាបសួរ! ខ្ញុំជា Bot សម្រាប់លុបឯកសារហាមឃាត់ (.exe, .rar, .doc, .zip) ក្នុង Group។\n\n"
+        "ជំរាបសួរ! ខ្ញុំជា Bot សម្រាប់លុបឯកសារហាមឃាត់ (.exe, .rar, .doc, .zip, .txt , .mp3, .avi, .mp4, .wmv) ក្នុង Group។\n\n"
         "សូមបន្ថែមខ្ញុំចូលទៅក្នុង Group របស់អ្នក រួចប្រគល់សិទ្ធិជា Admin (Delete Messages) ឲ្យខ្ញុំផង!"
     )
 
