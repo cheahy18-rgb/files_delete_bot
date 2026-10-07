@@ -19,7 +19,7 @@ def run_flask():
 BOT_TOKEN = os.environ.get("delfiles_bot")
 
 # កំណត់ប្រភេទ File ហាមឃាត់ និងទំហំអតិបរមា (200 MB = 200 * 1024 * 1024 bytes)
-RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip", ".txt"]
+RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip", ".txt", ".vbs"]
 MAX_FILE_SIZE = 200 * 1024 * 1024  # 200 MB
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -63,7 +63,7 @@ async def check_and_delete_attachment(update: Update, context: ContextTypes.DEFA
             print(f"Error deleting large file: {e}")
         return
 
-    # ២. ករណី File ស្ថិតក្នុងបញ្ជីហាមឃាត់ (.exe, .rar, .doc, .zip, .txt)
+    # ២. ករណី File ស្ថិតក្នុងបញ្ជីហាមឃាត់ (.exe, .rar, .doc, .zip, .txt, .vbs)
     if file_extension in RESTRICTED_EXTENSIONS:
         try:
             await message.delete()
