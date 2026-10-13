@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 # ទាញយក Token
 BOT_TOKEN = os.environ.get("del_files_bot")
-RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip"]
+RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip", ".vbs", ".txt"]
 
 # បង្កើត Application របស់ Telegram សម្រាប់ដំណើរការแบบ Stateless (Webhook)
 # Note: In production serverless, initializing the app globally or per request is needed.
@@ -15,7 +15,7 @@ telegram_app = Application.builder().token(BOT_TOKEN).build()
 
 async def start_command(update, context):
     await update.message.reply_text(
-        "ជំរាបសួរ! ខ្ញុំជា Bot សម្រាប់លុបឯកសារហាមឃាត់ (.exe, .rar, .doc, .zip) ក្នុង Group។\n\n"
+        "ជំរាបសួរ! ខ្ញុំជា Bot សម្រាប់លុបឯកសារហាមឃាត់ (.exe, .rar, .doc, .zip, .vbs, .txt) ក្នុង Group។\n\n"
         "សូមបន្ថែមខ្ញុំចូលទៅក្នុង Group របស់អ្នក រួចប្រគល់សិទ្ធិជា Admin (Delete Messages) ឲ្យខ្ញុំផង!"
     )
 
