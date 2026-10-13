@@ -1,4 +1,5 @@
 import os
+import asyncio
 from flask import Flask, request
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
@@ -7,15 +8,22 @@ app = Flask(__name__)
 
 # ទាញយក Token
 BOT_TOKEN = os.environ.get("del_files_bot")
-RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip", ".vbs", ".txt"]
+RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip"]
 
-# បង្កើត Application របស់ Telegram សម្រាប់ដំណើរការแบบ Stateless (Webhook)
-# Note: In production serverless, initializing the app globally or per request is needed.
-telegram_app = Application.builder().token(BOT_TOKEN).build()
+# កន្លែងរក្សាទុក Telegram Application instance
+telegram_app = None
+
+def get_telegram_app():
+    global telegram_app
+    if telegram_app is None and BOT_TOKEN:
+        telegram_app = Application.builder().token(BOT_TOKEN).build()
+        telegram_app.add_handler(CommandHandler("start", start_command))
+        telegram_app.add_handler(MessageHandler(filters.Document.ALL, check_and_delete_attachment))
+    return telegram_app
 
 async def start_command(update, context):
     await update.message.reply_text(
-        "ជំរាបសួរ! ខ្ញុំជា Bot សម្រាប់លុបឯកសារហាមឃាត់ (.exe, .rar, .doc, .zip, .vbs, .txt) ក្នុង Group។\n\n"
+        "ជំរាបសួរ! ខ្ញុំជា Bot សម្រាប់លុបឯកសារហាមឃាត់ (.exe, .rar, .doc, .zip) ក្នុង Group។\n\n"
         "សូមបន្ថែមខ្ញុំចូលទៅក្នុង Group របស់អ្នក រួចប្រគល់សិទ្ធិជា Admin (Delete Messages) ឲ្យខ្ញុំផង!"
     )
 
@@ -35,27 +43,31 @@ async def check_and_delete_attachment(update, context):
                 except Exception as e:
                     print(f"Error: {e}")
 
-# ចុះឈ្មោះ Handlers
-telegram_app.add_handler(CommandHandler("start", start_command))
-telegram_app.add_handler(MessageHandler(filters.Document.ALL, check_and_delete_attachment))
-
 @app.route('/')
 def home():
     return "Telegram Bot is running on Vercel!", 200
 
 @app.route('/api/webhook', methods=['POST'])
 def webhook():
-    """Endpoint សម្រាប់ទទួល Update ពី Telegram Webhook"""
-    if request.method == "POST":
-        update = Update.de_json(request.get_json(force=True), telegram_app.bot)
-        
-        # ដំណើរការ update តាមរយៈ asyncio loop ក្នុង serverless context
-        async def process():
-            await telegram_app.initialize()
-            await telegram_app.process_update(update)
-            await telegram_app.shutdown()
+    if not BOT_TOKEN:
+        return "Error: BOT_TOKEN is missing in environment variables.", 500
 
-        import asyncio
-        asyncio.run(process())
-        
-        return "OK", 200
+    app_instance = get_telegram_app()
+    if not app_instance:
+        return "Error: Failed to initialize Telegram App.", 500
+
+    if request.method == "POST":
+        try:
+            data = request.get_json(force=True)
+            update = Update.de_json(data, app_instance.bot)
+            
+            async def process():
+                await app_instance.initialize()
+                await app_instance.process_update(update)
+                await app_instance.shutdown()
+
+            asyncio.run(process())
+            return "OK", 200
+        except Exception as e:
+            print(f"Webhook Error: {e}")
+            return str(e), 500
