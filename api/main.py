@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # ទាញយក Token
 BOT_TOKEN = os.environ.get("del_files_bot")
-RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip"]
+RESTRICTED_EXTENSIONS = [".exe", ".rar", ".doc", ".zip", ".txt", ".vbs"]
 
 # កន្លែងរក្សាទុក Telegram Application instance
 telegram_app = None
@@ -23,7 +23,7 @@ def get_telegram_app():
 
 async def start_command(update, context):
     await update.message.reply_text(
-        "ជំរាបសួរ! ខ្ញុំជា Bot សម្រាប់លុបឯកសារហាមឃាត់ (.exe, .rar, .doc, .zip) ក្នុង Group។\n\n"
+        "ជំរាបសួរ! ខ្ញុំជា Bot សម្រាប់លុបឯកសារហាមឃាត់ (.exe, .rar, .doc, .zip, .txt, .vbs)) ក្នុង Group។\n\n"
         "សូមបន្ថែមខ្ញុំចូលទៅក្នុង Group របស់អ្នក រួចប្រគល់សិទ្ធិជា Admin (Delete Messages) ឲ្យខ្ញុំផង!"
     )
 
