@@ -47,8 +47,12 @@ async def check_and_delete_attachment(update, context):
 def home():
     return "Telegram Bot is running on Vercel!", 200
 
-@app.route('/api/webhook', methods=['POST'])
+@app.route('/api/webhook', methods=['GET', 'POST'])
 def webhook():
+    # បើមានគេចុចចូលតាម Browser (GET) ឱ្យវាបង្ហាញសារដំណឹងជំនួសឱ្យការចេញ Error 405
+    if request.method == 'GET':
+        return "Webhook endpoint is active. Telegram will send POST requests here.", 200
+
     if not BOT_TOKEN:
         return "Error: BOT_TOKEN is missing in environment variables.", 500
 
@@ -56,18 +60,18 @@ def webhook():
     if not app_instance:
         return "Error: Failed to initialize Telegram App.", 500
 
-    if request.method == "POST":
-        try:
-            data = request.get_json(force=True)
-            update = Update.de_json(data, app_instance.bot)
-            
-            async def process():
-                await app_instance.initialize()
-                await app_instance.process_update(update)
-                await app_instance.shutdown()
+    try:
+        data = request.get_json(force=True)
+        update = Update.de_json(data, app_instance.bot)
+        
+        async def process():
+            await app_instance.initialize()
+            await app_instance.process_update(update)
+            await app_instance.shutdown()
 
-            asyncio.run(process())
-            return "OK", 200
-        except Exception as e:
-            print(f"Webhook Error: {e}")
-            return str(e), 500
+        import asyncio
+        asyncio.run(process())
+        return "OK", 200
+    except Exception as e:
+        print(f"Webhook Error: {e}")
+        return str(e), 500
